@@ -130,8 +130,17 @@ namespace BililiveRecorder.Cli
 
             if (args.ConfigOverride is not null)
             {
-                logger.Information("Using config from {ConfigOverride}", args.ConfigOverride);
-                config = ConfigParser.LoadFromFile(args.ConfigOverride);
+                if (Directory.Exists(args.ConfigOverride))
+                {
+                    var overrideFile = Path.Combine(args.ConfigOverride, "config.json");
+                    logger.Information("Using config from {ConfigOverride}", overrideFile);
+                    config = ConfigParser.LoadFromFile(overrideFile);
+                }
+                else
+                {
+                    logger.Information("Using config from {ConfigOverride}", args.ConfigOverride);
+                    config = ConfigParser.LoadFromFile(args.ConfigOverride);
+                }
             }
             else
             {
@@ -231,7 +240,8 @@ namespace BililiveRecorder.Cli
                             services.AddSingleton(new BasicAuthCredential(sharedArguments.HttpBasicUser ?? string.Empty, sharedArguments.HttpBasicPass ?? string.Empty));
                         }
 
-                        if (sharedArguments.HttpOpenAccess || Environment.GetEnvironmentVariable("BREC_HTTP_OPEN_ACCESS") is not null){
+                        if (sharedArguments.HttpOpenAccess || Environment.GetEnvironmentVariable("BREC_HTTP_OPEN_ACCESS") is not null)
+                        {
                             services.AddSingleton(new DisableOpenAccessWarningConfig());
                         }
                     })
