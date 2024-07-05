@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -44,6 +45,10 @@ namespace BililiveRecorder.Cli
             {
                 ConsoleModeHelper.SetQuickEditMode(false);
             }
+
+            DistributedContextPropagator.Current = DistributedContextPropagator.CreateNoOutputPropagator();
+            AppContext.SetSwitch("System.Net.Http.EnableActivityPropagation", false);
+
             RootCommand root;
 
             using (var entrypointLogger = BuildLogger(LogEventLevel.Fatal, LogEventLevel.Verbose))
