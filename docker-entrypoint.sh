@@ -2,14 +2,19 @@
 
 set -e
 
-umask $UMASK
+umask "$UMASK"
 
-usermod -u $PUID user
-groupmod -g $PGID users
+if [ "$(id -u)" != "0" ]; then
+    echo "Skipped changing user and group because current user is not root."
+    exec dotnet /app/BililiveRecorder.Cli.dll "$@"
+fi
 
-chown -R user:users /app
-chown -R user:users /rec
+PUID=${PUID:-0}
+PGID=${PGID:-0}
 
-export HOME=/home/user
-
-exec /usr/local/bin/gosu user dotnet /app/BililiveRecorder.Cli.dll $@
+if [ "${PUID}" != "0" ] && [ "${PGID}" != "0" ]; then
+    chown -R "${PUID}":"${PGID}" /rec
+    exec /usr/local/bin/gosu "${PUID}":"${PGID}" dotnet /app/BililiveRecorder.Cli.dll "$@"
+else
+    exec dotnet /app/BililiveRecorder.Cli.dll "$@"
+fi
